@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Amy Hua | Ruby on Rails Developer]]></title>
+  <link href="http://www.amyhua.me/atom.xml" rel="self"/>
+  <link href="http://www.amyhua.me/"/>
+  <updated>2013-07-27T06:44:15-07:00</updated>
+  <id>http://www.amyhua.me/</id>
+  <author>
+    <name><![CDATA[Amy Hua]]></name>
+    <email><![CDATA[amy@amyhua.me]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Dealing with Associations in Rails 3]]></title>
+    <link href="http://www.amyhua.me/blog/2013/07/27/dealing-with-associations-in-rails-3/"/>
+    <updated>2013-07-27T00:17:00-07:00</updated>
+    <id>http://www.amyhua.me/blog/2013/07/27/dealing-with-associations-in-rails-3</id>
+    <content type="html"><![CDATA[<p>In most cases when you are creating a web application, you&rsquo;ll need to nest
+your objects: some objects (e.g. a comment) need to belong to another object (e.g. a post),
+and you will need to correctly route the resources for these objects while maintaining
+their nested relationship.</p>
+
+<p>This guide goes over the types of relationships that exist and how to define them in your models.</p>
+
+<ul>
+<li><a href="#associations">Associations</a>
+
+<ul>
+<li><a href="#associations-onetoone">One-to-One</a></li>
+<li><a href="#associations-onetomany">One-to-Many</a></li>
+<li><a href="#associations-manytomany">Many-to-Many</a></li>
+<li><a href="#polymorphic">Aside: Polymorphic Associations</a></li>
+</ul>
+</li>
+<li><a href="#models">Models</a>
+
+<ul>
+<li><a href="#models-onetoone">One-to-One</a></li>
+<li><a href="#models-onetomany">One-to-Many</a></li>
+<li><a href="#models-manytomany">Many-to-Many</a></li>
+</ul>
+</li>
+<li><a href="#nestedresources">Nested Resources</a></li>
+<li><a href="#databaseconfig">Database Configuration</a></li>
+<li><p><a href="#associatiomethods">Association Methods</a></p></li>
+<li><h3>Associations<a id="associations"></a></h3>
+
+<p>  Two different objects, A and B, can have one of several types of relationships with one another:</p>
+
+<ul>
+<li><p><strong>one-to-one</strong><a id="associations-onetoone"></a>: Object A has exactly one of object B, while object B has exactly one of object A.
+For example, every employee has a single resume, while every resume has a single employee;
+every left shoe has a right shoe, and every right shoe has a left shoe, etc.
+Such relationships are <em>bijective</em>: you would not have a right shoe
+without a left shoe, <em>and</em> you would not have a left shoe without a right shoe.</p></li>
+<li><p><strong>one-to-many</strong><a id="associations-onetomany"></a>: Object A has many of object B, whereas a single object B
+would belong to some object A. For example, a company has many employees, and
+every employee belongs to some company. There is a one-to-many relationship
+between libraries and books; solar systems and planets;
+mothers and daughters; and Lady Gaga and Lady Gaga fans. One-to-many relationships
+are <em>subjective</em>: for every employee, there is always a company that the employee
+belongs to, but it is not (always) the case that a given company contains a
+given employee. Every book belongs on shelf, but not always on any particular shelf
+that you choose.</p></li>
+<li><p><strong>many-to-many</strong><a id="associations-manytomany"></a>: An object A can be associated with multiple object Bs,
+while an object B can be associated with multiple object As.
+An author can write several books, while a book can have several authors.
+A class can have many students, while a student can have many classes.
+Over the course of time, a person can borrow many library books, while a book
+can be lent to many people.</p></li>
+<li><h4>Aside: Polymorphic associations<a id="polymorphic"></a></h4>
+
+<p>  Say you are designing Facebook and you want a Like to be able to belong to
+either a status, photo, or video.</p>
+
+<pre><code>Instead of creating separate models of likes to define likes
+</code></pre>
+
+<p>which belong to a status, likes which belong to a photo, and likes which
+belong to a video, you can define a <strong>polymorphic association</strong> between
+likes and status, photos &amp; videos which are a many-to-one relatonship
+between likes and all statuses/photos/videos. Polymorphic associations
+allow you to create just one Like class without defining multiple
+Like models which essentially have the same attributes and behaviors, allowing
+you to define relationships among objects that transcend class types.</p>
+
+<pre><code>A status, photo, or video has many likes, but they are all likeable.
+</code></pre>
+
+<p>You can define a polymoprhic association using the <code>:polymorphic</code> option
+of <code>belongs_to</code>. For example,</p>
+
+<pre><code>            class Like &lt; ActiveRecord::Base
+              belongs_to :likable, :polymoprhic =&gt; true
+              belongs_to :user
+            end
+</code></pre>
+
+<p>See more about defining polymorphic associations in a future post.</p></li>
+</ul>
+</li>
+<li><h3>Models<a id="models"></a></h3>
+
+<p>  In defining relationships among classes in your model, Rails uses
+the following helper methods for each given
+association type (note the use of plural and singular forms):</p>
+
+<ul>
+<li><p> <strong>In one-to-one</strong><a id="models-onetoone"></a></p>
+
+<pre><code>           class Employee &lt; ActiveRecord::Base
+             has_one :resume
+         end
+
+         class Resume &lt; ActiveRecord::Base
+           has_one :employee
+         end
+</code></pre></li>
+<li><p> <strong>In one-to-many</strong><a id="models-onetomany"></a></p>
+
+<pre><code>          class Magazine &lt; ActiveRecord::Base
+            has_many :ads
+       end
+
+          class Ad &lt; ActiveRecord::Base
+           belongs_to :magazine
+         end      
+</code></pre></li>
+<li><p> <strong>In many-to-many</strong><a id="models-onetomany"></a></p>
+
+<pre><code>          class Books &lt; ActiveRecord::Base
+          has_many :borrowers
+        end
+
+          class Borrower &lt; ActiveRecord::Base
+          has_many :books
+          end      
+</code></pre></li>
+</ul>
+</li>
+<li><p><strong>Nested Resources</strong><a id="nestedresources"></a></p>
+
+<p>  You may want to nest your resources when dealing with models in a
+many/one-to-many relationship in order to define routes
+like <em>like www.example.com/magazines/ads</em>.</p>
+
+<p>  In config/routes.rb,</p>
+
+<pre><code>    resources :magazines do
+      resources :ads
+      end
+</code></pre></li>
+<li><p><strong>Database Configuration</strong><a id="databaseconfig"></a></p>
+
+<p>  Define the associations between a magazine and an ad in the database by creating
+a column of foreign keys in the ads table called <code>magazine_id</code>.  Run a migration
+like the following:</p>
+
+<pre><code>      class AddMagazineIdToAds &lt; ActiveRecord::Migration
+      def change
+          add_column :ads, :magazine, :references
+          add_index :ads, :magazine_id
+      end
+      end
+</code></pre>
+
+<p>  The <code>references</code> part is a shortcut that adds an integer column acting as
+  your foreign key. It is called <code>magazine_id</code> in this case. ActiveRecord
+  determines the title of your foreign key by taking the string form of the
+  argument, <code>:magazine</code> and adding a suffix <code>_id</code>. You equally could have written:</p>
+
+<pre><code>   class AddMagazineIdToAds &lt; ActiveRecord::Migration
+      def change
+        add_column :ads, :magazine_id, :integer
+          add_index :ads, :magazine_id
+      end
+      end
+</code></pre>
+
+<p>  Indexing <code>magazine_id</code> allows our database to search through <code>magazine_id</code> more quickly.</p>
+
+<p>  When you call <code>@magazine.ads</code>, ActiveRecord searches through the ads in your
+ads table which contain the <code>magazine_id</code> matching your primary key <code>id</code>
+belonging to <code>@magazine</code> in your <code>magazines</code> table.</p>
+
+<p>  If you use SQL as your database, then if the <code>id</code> or primary key for <code>@magazine</code>
+  in your magazines table is equal to 1, calling <code>@magazine.ads</code> would run
+  the SQL query</p>
+
+<pre><code>   SELECT * FROM ads WHERE magazine_id = 1
+</code></pre>
+
+<p>  to collect all ads belonging to <code>@magazine</code>.</p></li>
+<li><p><strong>Association methods</strong><a id="associationmethods"></a></p>
+
+<p>  Defining associations in your models automatically gives you access to a slew
+  of useful association methods inherited from ActiveRecord.</p>
+
+<p>  If you have a one-to-many relationship like</p>
+
+<pre><code>               class Magazine &lt; ActiveRecord::Base
+                has_many :ads
+           end
+
+              class Ad &lt; ActiveRecord::Base
+               belongs_to :magazine
+             end      
+</code></pre>
+
+<p>  <code>has_many</code> creates an <code>ads</code> method on any given Magazine object, e.g., <code>@magazine.ads</code>
+which returns a collection of <code>ads</code> that belong to <code>@magazine</code>.</p>
+
+<p>  <code>has_many</code> also gives you useful helper methods, such as <code>@ad = @magazine.ads.build</code>
+which instantiates a new record <code>@ad</code> that associates itself with <code>@magazine</code>,
+allowing you to add an ad to <code>@magazines.ads</code> without having to call <code>@ad.save</code>.</p>
+
+<p>  There are many other useful association methods you can learn about on the <a href="http://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html">Ruby on Rails API</a>.</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hello World]]></title>
+    <link href="http://www.amyhua.me/blog/2013/07/26/hello-world/"/>
+    <updated>2013-07-26T23:52:00-07:00</updated>
+    <id>http://www.amyhua.me/blog/2013/07/26/hello-world</id>
+    <content type="html"><![CDATA[<p>And&hellip;</p>
+
+<pre><code>def hello_world
+  print "Hello World"
+end
+</code></pre>
+
+<p>Begin.</p>
+
+<p>My name is Amy Hua, and this is my brand spankin&#8217; new blog.
+I&rsquo;ve got a lot of ambitions for this baby. It doesn&rsquo;t look so
+great right now, but it will soon. This website will serve as
+my coding journal, my portfolio, and my museum of digital history.
+Be prepared for self obsession (but hey, you asked for it: what
+else would you expect out of a self-titled .me website?).</p>
+
+<p>Broadly speaking, hacking to me refers to the practice of clever
+invention and design. To hack is to take a series of seemingly unlikely
+combinations of components and <em>make</em> something out of it.
+Hacking comes in many forms: code, travel, food, and life.</p>
+
+<p>Most of my code will be written in Ruby on Rails (currently 3.2.13). Sometimes, I dabble in
+Javascript, Node, HTML, and/or CSS, but mostly Ruby on Rails.
+I&rsquo;d love to see this site grow along with the general development
+of the life of myself and my code.</p>
+
+<p>This is me, Amy Hua.</p>
+
+<p>Welcome to AmyHua.me.</p>
+]]></content>
+  </entry>
+  
+</feed>
