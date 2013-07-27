@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
+    <url>
+        <loc>http://www.amyhua.me/blog/2013/07/26/hello-world/</loc>
+        <lastmod>2013-07-27T15:30:52-07:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.amyhua.me/blog/2013/07/27/dealing-with-associations-in-rails-3/</loc>
+        <lastmod>2013-07-27T15:30:52-07:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.amyhua.me/404.html</loc>
+        <lastmod>2013-07-27T15:30:52-07:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.amyhua.me/contact/</loc>
+        <lastmod>2013-07-27T15:30:52-07:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.amyhua.me/</loc>
+        <lastmod>2013-07-27T15:30:52-07:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.amyhua.me/projects/</loc>
+        <lastmod>2013-07-27T15:30:52-07:00</lastmod>
+    </url>
+</urlset>
